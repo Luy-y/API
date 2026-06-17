@@ -1,0 +1,23 @@
+
+RELATÓRIO DE OCUPAÇÃO
+========================
+
+Período: 2026-04-30 03:00:00 até 2026-05-01 02:59:00
+
+Total de registros: 1
+
+% Ambientes distintos: 100.00%
+% Instrutores distintos: 100.00%
+% Turmas distintas: 100.00%
+
+------------------------
+DETALHES:
+
+Ambiente: undefined
+Instrutor: undefined
+Turma: undefined
+Início: Thu Apr 30 2026 18:30:00 GMT-0300 (Horário Padrão de Brasília)
+Fim: Thu Apr 30 2026 22:30:00 GMT-0300 (Horário Padrão de Brasília)
+------------------------
+
+Gerado em: 30/04/2026, 22:05:35

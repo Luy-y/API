@@ -1,0 +1,248 @@
+########################################
+### 👤 USUÁRIOS
+########################################
+
+### LISTAR
+GET http://localhost:3000/usuarios
+
+###
+
+### CRIAR
+POST http://localhost:3000/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Admin",
+  "email": "adminn@email.com",
+  "telefone": "99999-9999",
+  "tipo": "ADM",
+  "senha": "123456"
+}
+
+###
+
+### BUSCAR POR ID
+GET http://localhost:3000/usuarios/1
+
+###
+
+### ATUALIZAR
+PUT http://localhost:3000/usuarios/1
+Content-Type: application/json
+
+{
+  "nome": "Admin Atualizado",
+  "email": "admin@email.com",
+  "telefone": "88888-8888",
+  "tipo": "ADM",
+  "senha": "654321"
+}
+
+###
+
+### DELETAR
+DELETE http://localhost:3000/usuarios/1
+
+
+
+########################################
+### 👨‍🏫 INSTRUTORES
+########################################
+
+### LISTAR
+GET http://localhost:3000/instrutores
+
+###
+
+### CRIAR
+POST http://localhost:3000/instrutores
+Content-Type: application/json
+
+{
+  "nome": "Carlos",
+  "email": "carlos@email.com",
+  "telefone": "99999-9999"
+}
+
+###
+
+### BUSCAR POR ID
+GET http://localhost:3000/instrutores/1
+
+###
+
+### ATUALIZAR
+PUT http://localhost:3000/instrutores/1
+Content-Type: application/json
+
+{
+  "nome": "Carlos Atualizado",
+  "email": "carlos@email.com",
+  "telefone": "88888-8888"
+}
+
+###
+
+### DELETAR
+DELETE http://localhost:3000/instrutores/1
+
+
+
+########################################
+### 🏫 TURMAS
+########################################
+
+### LISTAR
+GET http://localhost:3000/turmas
+
+###
+
+### CRIAR
+POST http://localhost:3000/turmas
+Content-Type: application/json
+
+{
+  "nome_turma": "Turma 203",
+  "id_instrutor": 1
+}
+
+###
+
+### BUSCAR POR ID
+GET http://localhost:3000/turmas/1
+
+###
+
+### ATUALIZAR
+PUT http://localhost:3000/turmas/1
+Content-Type: application/json
+
+{
+  "nome_turma": "Turma 203 Atualizada",
+  "id_instrutor": 1
+}
+
+###
+
+### DELETAR
+DELETE http://localhost:3000/turmas/1
+
+
+
+########################################
+### 🏢 AMBIENTES
+########################################
+
+### LISTAR
+GET http://localhost:3000/ambientes
+
+###
+
+### CRIAR
+POST http://localhost:3000/ambientes
+Content-Type: application/json
+
+{
+  "nome": "Sala 203",
+  "data_horario": "2026-04-16 14:00:00",
+  "status": "Vazio",
+  "id_turmas_fk": 1
+}
+
+###
+
+### BUSCAR POR ID
+GET http://localhost:3000/ambientes/1
+
+###
+
+### ATUALIZAR
+PUT http://localhost:3000/ambientes/1
+Content-Type: application/json
+
+{
+  "nome": "Sala 203",
+  "data_horario": "2026-04-16 16:00:00",
+  "status": "Ocupado",
+  "id_turmas_fk": 1
+}
+
+###
+
+### DELETAR
+DELETE http://localhost:3000/ambientes/1
+
+
+
+########################################
+### 📋 REGISTROS
+########################################
+
+### LISTAR
+GET http://localhost:3000/registros
+
+###
+
+### CRIAR
+POST http://localhost:3000/registros
+Content-Type: application/json
+
+{
+  "id_ambiente": 1,
+  "id_instrutor": 1,
+  "id_turma": 1,
+  "data_inicio": "2026-04-16 14:00:00",
+  "data_fim": "2026-04-16 16:00:00"
+}
+
+###
+
+### BUSCAR POR ID
+GET http://localhost:3000/registros/1
+
+###
+
+### ATUALIZAR
+PUT http://localhost:3000/registros/1
+Content-Type: application/json
+
+{
+  "id_ambiente": 1,
+  "id_instrutor": 1,
+  "id_turma": 1,
+  "data_inicio": "2026-04-16 15:00:00",
+  "data_fim": "2026-04-16 17:00:00"
+}
+
+###
+
+### DELETAR
+DELETE http://localhost:3000/registros/1
+
+
+
+########################################
+### 📊 RELATÓRIOS
+########################################
+
+### GERAR RELATÓRIO
+POST http://localhost:3000/relatorios/gerar
+Content-Type: application/json
+
+{
+  "data_inicio": "2026-01-01 00:00:00",
+  "data_fim": "2026-12-31 23:59:59",
+  "ambiente": "",
+  "instrutor": "",
+  "turma": ""
+}
+
+###
+
+### DOWNLOAD (trocar nome depois de gerar)
+GET http://localhost:3000/relatorios/download/relatorio_EXEMPLO.txt
+
+###
+
+### DELETAR RELATÓRIO
+DELETE http://localhost:3000/relatorios/delete/relatorio_EXEMPLO.txt
