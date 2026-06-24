@@ -13,7 +13,7 @@ function formatarData(data) {
     return data.replace('T', ' ') + ':00';
 }
 
-// LISTAR
+
 exports.listar = async (req, res, next) => {
 
     try {
@@ -28,7 +28,7 @@ exports.listar = async (req, res, next) => {
     }
 };
 
-// BUSCAR
+
 exports.buscarPorId = async (req, res, next) => {
 
     try {
@@ -50,7 +50,7 @@ exports.buscarPorId = async (req, res, next) => {
     }
 };
 
-// CRIAR
+
 exports.criar = async (req, res, next) => {
 
     try {

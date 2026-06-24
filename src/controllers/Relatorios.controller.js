@@ -207,11 +207,17 @@ async function ocupacaoHoje(req, res) {
             null
         );
 
+        console.log("TIPO:", typeof registros[0]?.data_inicio);
+        console.log("VALOR:", registros[0]?.data_inicio);
+
         res.json({ registros });
 
     } catch (erro) {
-        console.error(erro);
-        res.status(500).json({ erro: "Erro na ocupação" });
+        console.error("Erro na ocupação:", erro);
+
+        res.status(500).json({
+            erro: "Erro na ocupação"
+        });
     }
 }
 

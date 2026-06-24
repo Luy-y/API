@@ -1,6 +1,5 @@
 const express = require('express');
-const controller = require('../controllers/Registros.controller'); // ✅ CORRIGIDO
-
+const controller = require('../controllers/Registros.controller'); 
 const router = express.Router();
 
 router.get('/', controller.listar);

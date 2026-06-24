@@ -26,6 +26,7 @@ app.use('/autenticacao', autenticacaoRoutes);
 app.use('/relatorios', relatoriosRoutes);
 app.use('/instrutores', instrutoresRoutes);
 
+
 // Middleware de erro sempre por último
 app.use(errorMiddleware);
 

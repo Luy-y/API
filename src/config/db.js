@@ -5,8 +5,11 @@ const pool = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_DATABASE || 'Gestão_Ambiente', 
-    port: process.env.DB_PORT
+    database: process.env.DB_DATABASE || 'Gestão_Ambiente',
+    port: process.env.DB_PORT,
+
+    timezone: '-03:00',
+    dateStrings: true
 });
 
 pool.getConnection((err, connection) => {
