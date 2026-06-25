@@ -152,41 +152,44 @@ async function exportar(req, res) {
 }
 
 function getPeriodoAtual() {
-    const agora = new Date();
 
-    console.log("Agora:", agora);
-    console.log("Hora:", agora.getHours());
-    console.log("Minuto:", agora.getMinutes());
+    const agora = new Date(
+        new Date().toLocaleString("en-US", {
+            timeZone: "America/Sao_Paulo"
+        })
+    );
 
-    const hoje = new Date();
+    const hoje = new Date(agora);
     hoje.setHours(0, 0, 0, 0);
 
     const tardeInicio = new Date(hoje);
-    tardeInicio.setHours(12, 55, 0);
+    tardeInicio.setHours(12, 55, 0, 0);
 
     const tardeFim = new Date(hoje);
-    tardeFim.setHours(17, 50, 0);
+    tardeFim.setHours(17, 50, 0, 0);
 
     const noiteInicio = new Date(hoje);
-    noiteInicio.setHours(17, 55, 0);
+    noiteInicio.setHours(17, 55, 0, 0);
 
     const noiteFim = new Date(hoje);
-    noiteFim.setHours(23, 0, 0);
+    noiteFim.setHours(23, 0, 0, 0);
 
-    console.log("Tarde:", tardeInicio, "-", tardeFim);
-    console.log("Noite:", noiteInicio, "-", noiteFim);
+    console.log("Agora Brasília:", agora);
 
     if (agora >= tardeInicio && agora <= tardeFim) {
-        console.log("Entrou na TARDE");
-        return { inicio: tardeInicio, fim: tardeFim };
+        return {
+            inicio: tardeInicio,
+            fim: tardeFim
+        };
     }
 
     if (agora >= noiteInicio && agora <= noiteFim) {
-        console.log("Entrou na NOITE");
-        return { inicio: noiteInicio, fim: noiteFim };
+        return {
+            inicio: noiteInicio,
+            fim: noiteFim
+        };
     }
 
-    console.log("Fora de qualquer período.");
     return null;
 }
 
