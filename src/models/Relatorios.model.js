@@ -12,9 +12,9 @@ async function buscarPorPeriodo(data_inicio, data_fim, ambiente, instrutor, turm
     JOIN Ambientes a ON r.id_ambiente = a.id_ambientes
     JOIN Instrutores i ON r.id_instrutor = i.id_instrutor
     JOIN Turmas t ON r.id_turma = t.id_turmas
-    WHERE r.data_inicio <= ? AND r.data_fim >= ?
-    `;
 
+    `;
+//WHERE r.data_inicio <= ? AND r.data_fim >= ?
     const params = [data_fim, data_inicio]; // ⚠️ ordem invertida proposital
 
     if (instrutor) {
