@@ -3,7 +3,7 @@ const db = require('../config/db');
 async function buscarPorPeriodo(data_inicio, data_fim, ambiente, instrutor, turma) {
 
     let query = `
-    SELECT 
+    SELECT
         r.*,
         a.nome AS ambiente_nome,
         i.nome AS instrutor_nome,
@@ -12,10 +12,10 @@ async function buscarPorPeriodo(data_inicio, data_fim, ambiente, instrutor, turm
     JOIN Ambientes a ON r.id_ambiente = a.id_ambientes
     JOIN Instrutores i ON r.id_instrutor = i.id_instrutor
     JOIN Turmas t ON r.id_turma = t.id_turmas
-
+    WHERE r.data_inicio <= ? AND r.data_fim >= ?
     `;
-//WHERE r.data_inicio <= ? AND r.data_fim >= ?
-    const params = [data_fim, data_inicio]; // ⚠️ ordem invertida proposital
+
+    const params = [data_fim, data_inicio];
 
     if (instrutor) {
         query += " AND r.id_instrutor = ?";
@@ -32,11 +32,31 @@ async function buscarPorPeriodo(data_inicio, data_fim, ambiente, instrutor, turm
         params.push(turma);
     }
 
+    console.log("\n========== QUERY ==========");
+    console.log(query);
+
+    console.log("\n========== PARÂMETROS ==========");
+    console.log(params);
+
+    console.log("\nData início enviada:", data_inicio);
+    console.log("Data fim enviada:", data_fim);
+
     const [rows] = await db.promise().query(query, params);
+
+    console.log("\n========== RESULTADO ==========");
+    console.log("Quantidade:", rows.length);
+
+    if (rows.length > 0) {
+        console.log("Primeiro registro:");
+        console.log(rows[0]);
+    } else {
+        console.log("Nenhum registro retornado pela query.");
+    }
+
+    console.log("===============================\n");
 
     return rows;
 }
-
 module.exports = {
     buscarPorPeriodo
 };

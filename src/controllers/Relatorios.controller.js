@@ -190,14 +190,22 @@ function formatSQL(date) {
 /* 🔥 OCUPAÇÃO CORRIGIDA */
 async function ocupacaoHoje(req, res) {
     try {
+        console.log("========== OCUPAÇÃO HOJE ==========");
+
         const periodo = getPeriodoAtual();
 
+        console.log("Período calculado:", periodo);
+
         if (!periodo) {
+            console.log("Nenhum período encontrado.");
             return res.json({ registros: [] });
         }
 
         const inicio = formatSQL(periodo.inicio);
         const fim = formatSQL(periodo.fim);
+
+        console.log("Início formatado:", inicio);
+        console.log("Fim formatado:", fim);
 
         const registros = await model.buscarPorPeriodo(
             inicio,
@@ -207,20 +215,30 @@ async function ocupacaoHoje(req, res) {
             null
         );
 
-        console.log("TIPO:", typeof registros[0]?.data_inicio);
-        console.log("VALOR:", registros[0]?.data_inicio);
+        console.log("Quantidade de registros:", registros.length);
+
+        if (registros.length > 0) {
+            console.log("Primeiro registro:");
+            console.log(registros[0]);
+            console.log("Tipo data_inicio:", typeof registros[0].data_inicio);
+            console.log("Valor data_inicio:", registros[0].data_inicio);
+        } else {
+            console.log("Nenhum registro encontrado.");
+        }
+
+        console.log("===================================");
 
         res.json({ registros });
 
     } catch (erro) {
-        console.error("Erro na ocupação:", erro);
+        console.error("Erro na ocupação:");
+        console.error(erro);
 
         res.status(500).json({
             erro: "Erro na ocupação"
         });
     }
 }
-
 /* 🔥 DOWNLOAD */
 function baixar(req, res) {
     try {
