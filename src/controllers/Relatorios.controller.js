@@ -154,6 +154,10 @@ async function exportar(req, res) {
 function getPeriodoAtual() {
     const agora = new Date();
 
+    console.log("Agora:", agora);
+    console.log("Hora:", agora.getHours());
+    console.log("Minuto:", agora.getMinutes());
+
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
 
@@ -169,14 +173,20 @@ function getPeriodoAtual() {
     const noiteFim = new Date(hoje);
     noiteFim.setHours(23, 0, 0);
 
+    console.log("Tarde:", tardeInicio, "-", tardeFim);
+    console.log("Noite:", noiteInicio, "-", noiteFim);
+
     if (agora >= tardeInicio && agora <= tardeFim) {
+        console.log("Entrou na TARDE");
         return { inicio: tardeInicio, fim: tardeFim };
     }
 
     if (agora >= noiteInicio && agora <= noiteFim) {
+        console.log("Entrou na NOITE");
         return { inicio: noiteInicio, fim: noiteFim };
     }
 
+    console.log("Fora de qualquer período.");
     return null;
 }
 
