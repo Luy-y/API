@@ -201,56 +201,81 @@ function formatSQL(date) {
 }
 
 /* 🔥 OCUPAÇÃO CORRIGIDA */
+
+/* 🔥 OCUPAÇÃO HOJE (SSE STREAM) */
 async function ocupacaoHoje(req, res) {
-    try {
-        console.log("========== OCUPAÇÃO HOJE ==========");
+    // Headers obrigatórios para SSE
+    res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no" // evita buffering em proxies tipo nginx
+    });
 
-        const periodo = getPeriodoAtual();
+    res.flushHeaders?.(); // garante que os headers saiam imediatamente
 
-        console.log("Período calculado:", periodo);
+    let ativo = true;
 
-        if (!periodo) {
-            console.log("Nenhum período encontrado.");
-            return res.json({ registros: [] });
+    async function enviarAtualizacao() {
+        if (!ativo) return;
+
+        try {
+            console.log("========== OCUPAÇÃO HOJE (stream tick) ==========");
+
+            const periodo = getPeriodoAtual();
+            console.log("Período calculado:", periodo);
+
+            let registros = [];
+
+            if (periodo) {
+                const inicio = formatSQL(periodo.inicio);
+                const fim = formatSQL(periodo.fim);
+
+                console.log("Início formatado:", inicio);
+                console.log("Fim formatado:", fim);
+
+                registros = await model.buscarPorPeriodo(
+                    inicio,
+                    fim,
+                    null,
+                    null,
+                    null
+                );
+
+                console.log("Quantidade de registros:", registros.length);
+            } else {
+                console.log("Nenhum período encontrado.");
+            }
+
+            console.log("===================================");
+
+            const payload = JSON.stringify({ registros });
+
+            // formato SSE: precisa do prefixo "data: " e terminar com \n\n
+            res.write(`data: ${payload}\n\n`);
+
+        } catch (erro) {
+            console.error("Erro na ocupação (stream):");
+            console.error(erro);
+
+            const erroPayload = JSON.stringify({ erro: "Erro na ocupação" });
+            res.write(`data: ${erroPayload}\n\n`);
         }
-
-        const inicio = formatSQL(periodo.inicio);
-        const fim = formatSQL(periodo.fim);
-
-        console.log("Início formatado:", inicio);
-        console.log("Fim formatado:", fim);
-
-        const registros = await model.buscarPorPeriodo(
-            inicio,
-            fim,
-            null,
-            null,
-            null
-        );
-
-        console.log("Quantidade de registros:", registros.length);
-
-        if (registros.length > 0) {
-            console.log("Primeiro registro:");
-            console.log(registros[0]);
-            console.log("Tipo data_inicio:", typeof registros[0].data_inicio);
-            console.log("Valor data_inicio:", registros[0].data_inicio);
-        } else {
-            console.log("Nenhum registro encontrado.");
-        }
-
-        console.log("===================================");
-
-        res.json({ registros });
-
-    } catch (erro) {
-        console.error("Erro na ocupação:");
-        console.error(erro);
-
-        res.status(500).json({
-            erro: "Erro na ocupação"
-        });
     }
+
+    // primeira emissão imediata
+    await enviarAtualizacao();
+
+    // depois, atualiza a cada 15s (ajuste o intervalo se quiser)
+    const intervalo = setInterval(enviarAtualizacao, 15000);
+
+    // limpeza quando o cliente desconectar
+    req.on("close", () => {
+        ativo = false;
+        clearInterval(intervalo);
+        res.end();
+        console.log("Cliente desconectou do stream de ocupação.");
+    });
 }
 /* 🔥 DOWNLOAD */
 function baixar(req, res) {
