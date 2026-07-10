@@ -203,36 +203,31 @@ function formatSQL(date) {
 /* 🔥 OCUPAÇÃO CORRIGIDA */
 
 /* 🔥 OCUPAÇÃO HOJE (SSE STREAM) */
+/* 🔥 OCUPAÇÃO HOJE (SSE STREAM - só emite quando muda) */
 async function ocupacaoHoje(req, res) {
-    // Headers obrigatórios para SSE
     res.writeHead(200, {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         "Connection": "keep-alive",
-        "X-Accel-Buffering": "no" // evita buffering em proxies tipo nginx
+        "X-Accel-Buffering": "no"
     });
 
-    res.flushHeaders?.(); // garante que os headers saiam imediatamente
+    res.flushHeaders?.();
 
     let ativo = true;
+    let ultimoPayload = null; // guarda o último JSON enviado
 
-    async function enviarAtualizacao() {
+    async function enviarSeMudou() {
         if (!ativo) return;
 
         try {
-            console.log("========== OCUPAÇÃO HOJE (stream tick) ==========");
-
             const periodo = getPeriodoAtual();
-            console.log("Período calculado:", periodo);
 
             let registros = [];
 
             if (periodo) {
                 const inicio = formatSQL(periodo.inicio);
                 const fim = formatSQL(periodo.fim);
-
-                console.log("Início formatado:", inicio);
-                console.log("Fim formatado:", fim);
 
                 registros = await model.buscarPorPeriodo(
                     inicio,
@@ -241,18 +236,16 @@ async function ocupacaoHoje(req, res) {
                     null,
                     null
                 );
-
-                console.log("Quantidade de registros:", registros.length);
-            } else {
-                console.log("Nenhum período encontrado.");
             }
-
-            console.log("===================================");
 
             const payload = JSON.stringify({ registros });
 
-            // formato SSE: precisa do prefixo "data: " e terminar com \n\n
-            res.write(`data: ${payload}\n\n`);
+            // só escreve no stream se for diferente do último envio
+            if (payload !== ultimoPayload) {
+                console.log("Mudança detectada, enviando atualização. Registros:", registros.length);
+                res.write(`data: ${payload}\n\n`);
+                ultimoPayload = payload;
+            }
 
         } catch (erro) {
             console.error("Erro na ocupação (stream):");
@@ -263,16 +256,22 @@ async function ocupacaoHoje(req, res) {
         }
     }
 
-    // primeira emissão imediata
-    await enviarAtualizacao();
+    // primeira emissão sempre acontece (ultimoPayload começa null)
+    await enviarSeMudou();
 
-    // depois, atualiza a cada 15s (ajuste o intervalo se quiser)
-    const intervalo = setInterval(enviarAtualizacao, 15000);
+    // verifica mudanças a cada 15s, mas só emite se algo mudou
+    const intervalo = setInterval(enviarSeMudou, 15000);
 
-    // limpeza quando o cliente desconectar
+    // heartbeat (comentário SSE) a cada 20s pra manter a conexão viva
+    // sem disparar onmessage no front — evita timeout de proxy sem gerar ruído
+    const heartbeat = setInterval(() => {
+        if (ativo) res.write(`: ping\n\n`);
+    }, 20000);
+
     req.on("close", () => {
         ativo = false;
         clearInterval(intervalo);
+        clearInterval(heartbeat);
         res.end();
         console.log("Cliente desconectou do stream de ocupação.");
     });
