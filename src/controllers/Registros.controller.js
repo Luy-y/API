@@ -80,6 +80,16 @@ exports.criar = async (req, res, next) => {
             });
         }
 
+        // VALIDAR TIPO DOS IDs
+        if (
+            ![id_ambiente, id_instrutor, id_turma].every(v => /^\d+$/.test(String(v)))
+        ) {
+
+            return res.status(400).json({
+                erro: 'IDs de ambiente, instrutor e turma devem ser numéricos'
+            });
+        }
+
         // FORMATAR DATAS
         data_inicio = formatarData(data_inicio);
         data_fim = formatarData(data_fim);
@@ -183,6 +193,13 @@ exports.atualizar = async (req, res, next) => {
             data_inicio,
             data_fim
         } = req.body;
+
+        // VALIDAR TIPO DOS IDs (só quando enviados, já que aqui são opcionais)
+        for (const [nome, valor] of Object.entries({ id_ambiente, id_instrutor, id_turma })) {
+            if (valor !== undefined && valor !== null && valor !== "" && !/^\d+$/.test(String(valor))) {
+                return res.status(400).json({ erro: `${nome} deve ser numérico` });
+            }
+        }
 
         if (data_inicio) {
             data_inicio = formatarData(data_inicio);

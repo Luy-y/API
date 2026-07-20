@@ -37,6 +37,21 @@ function formatarDataCSV(data) {
     });
 }
 
+/* 🔒 Evita CSV/Formula Injection: campos que começam com =, +, - ou @
+   podem ser interpretados como fórmula pelo Excel/LibreOffice ao abrir
+   o arquivo (ex: um instrutor cadastrado como "=cmd|'/c calc'!A1").
+   Prefixamos com um apóstrofo, que faz esses programas tratarem o
+   valor como texto puro — sem mudar o dado nem o formato do CSV. */
+function sanitizarCampoCSV(valor) {
+    const texto = String(valor ?? "");
+
+    if (/^[=+\-@]/.test(texto)) {
+        return `'${texto}`;
+    }
+
+    return texto;
+}
+
 async function gerar(req, res) {
     try {
         let { data_inicio, data_fim, ambiente, instrutor, turma } = req.body;
@@ -45,6 +60,15 @@ async function gerar(req, res) {
             return res.status(400).json({
                 erro: "Informe data_inicio e data_fim"
             });
+        }
+
+        // 🔒 Filtros são opcionais, mas se vierem preenchidos precisam ser
+        // o ID numérico esperado (evita passar lixo pra query e deixa o
+        // erro claro pro cliente em vez de simplesmente não filtrar nada).
+        for (const [nome, valor] of Object.entries({ ambiente, instrutor, turma })) {
+            if (valor !== undefined && valor !== null && valor !== "" && !/^\d+$/.test(valor)) {
+                return res.status(400).json({ erro: `Filtro ${nome} inválido` });
+            }
         }
 
         data_inicio = formatarData(data_inicio);
@@ -104,6 +128,12 @@ async function exportar(req, res) {
             });
         }
 
+        for (const [nome, valor] of Object.entries({ ambiente, instrutor, turma })) {
+            if (valor !== undefined && valor !== null && valor !== "" && !/^\d+$/.test(valor)) {
+                return res.status(400).json({ erro: `Filtro ${nome} inválido` });
+            }
+        }
+
         data_inicio = formatarData(data_inicio);
         data_fim = formatarData(data_fim);
 
@@ -124,7 +154,7 @@ async function exportar(req, res) {
         let csv = `Data Inicio${sep}Data Fim${sep}Ambiente${sep}Instrutor${sep}Turma\n`;
 
         registros.forEach(r => {
-            csv += `${formatarDataCSV(r.data_inicio)}${sep}${formatarDataCSV(r.data_fim)}${sep}${r.ambiente_nome}${sep}${r.instrutor_nome}${sep}${r.nome_turma}\n`;
+            csv += `${formatarDataCSV(r.data_inicio)}${sep}${formatarDataCSV(r.data_fim)}${sep}${sanitizarCampoCSV(r.ambiente_nome)}${sep}${sanitizarCampoCSV(r.instrutor_nome)}${sep}${sanitizarCampoCSV(r.nome_turma)}\n`;
         });
 
         const pasta = path.join(__dirname, "..", "relatorios");
@@ -280,7 +310,29 @@ async function ocupacaoHoje(req, res) {
 function baixar(req, res) {
     try {
         const nomeArquivo = req.params.nome;
-        const caminho = path.join(__dirname, "..", "relatorios", nomeArquivo);
+
+        // 🔒 Só aceita o padrão exato de nome gerado pelo próprio sistema
+        // (relatorio_<timestamp>.csv ou .txt). Bloqueia "..", barras,
+        // caminhos absolutos e qualquer outro nome fora desse formato.
+        if (!/^relatorio_\d+\.(csv|txt)$/.test(nomeArquivo)) {
+            return res.status(400).json({ erro: "Nome de arquivo inválido" });
+        }
+
+        const pastaRelatorios = path.join(__dirname, "..", "relatorios");
+        const caminho = path.join(pastaRelatorios, nomeArquivo);
+
+        // 🔒 Defesa em profundidade: mesmo que a validação acima falhe por
+        // algum motivo, garante que o caminho final resolvido continua
+        // dentro da pasta "relatorios" antes de tentar ler o arquivo.
+        const relativo = path.relative(pastaRelatorios, caminho);
+
+        if (relativo.startsWith("..") || path.isAbsolute(relativo)) {
+            return res.status(400).json({ erro: "Caminho de arquivo inválido" });
+        }
+
+        if (!fs.existsSync(caminho)) {
+            return res.status(404).json({ erro: "Arquivo não encontrado" });
+        }
 
         res.download(caminho);
     } catch (erro) {

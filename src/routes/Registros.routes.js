@@ -1,14 +1,15 @@
 const express = require('express');
-const controller = require('../controllers/Registros.controller'); 
+const controller = require('../controllers/Registros.controller');
 const router = express.Router();
 
-router.get('/', controller.listar);
-router.get('/:id', controller.buscarPorId);
-
 const { verificarAdmin } = require('../middlewares/auth');
+const { validarId } = require('../middlewares/validarId');
+
+router.get('/', controller.listar);
+router.get('/:id', validarId, controller.buscarPorId);
 
 router.post('/', verificarAdmin, controller.criar);
-router.put('/:id', verificarAdmin, controller.atualizar);
-router.delete('/:id', verificarAdmin, controller.deletar);
+router.put('/:id', verificarAdmin, validarId, controller.atualizar);
+router.delete('/:id', verificarAdmin, validarId, controller.deletar);
 
 module.exports = router;
